@@ -19,6 +19,10 @@ import (
 	"github.com/g3n/engine/util/helper"
 	"github.com/g3n/engine/window"
 	// 2D modules
+	//"github.com/hajimehoshi/ebiten/v2"
+	//"bytes"
+	//"image"
+	//"log"
 )
 
 // GameMode represents the dimension type (2D or 3D)
