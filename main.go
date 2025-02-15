@@ -157,7 +157,9 @@ func CreateRenderer(options *GameOptions) Renderer {
 }
 
 func main() {
-	actor := input_handler.GameActor{}
+	actor := input_handler.GameActor{
+		Health: 100,
+	}
 	// Need a handful of if statements that pull in the start menu of the game
 	// It will display the game with three coconuts huddle around
 	// Two of them will have army helments while the other coconut on the far right will have
