@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	// The database should hold the the data and be updated if the user has changed any of the settings at all
 	// Game will always run 2D graphics by default
 	game := options.Game{
 		Mode: 0,
@@ -20,6 +21,10 @@ func main() {
 	if game.Mode == 1 {
 		fmt.Println("3D has been enabled by user!")
 		game = *(options.CreateGame(&game))
+		game.Game3D.Initialize() // Initalize the game startup
+	} else {
+		game = *(options.CreateGame(&game))
+		game.Game2D.Initialize() // Initalize the game startup
 	}
 	// Need a handful of if statements that pull in the start menu of the game
 	// It will display the game with three coconuts huddle around

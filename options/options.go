@@ -16,8 +16,9 @@ import (
 	"github.com/g3n/engine/renderer"
 	"github.com/g3n/engine/util/helper"
 	"github.com/g3n/engine/window"
+
 	// 2D modules
-	//"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2"
 	//"bytes"
 	//"image"
 	//"log"
@@ -26,40 +27,33 @@ import (
 // GameMode represents the dimension type (2D or 3D)
 type gameMode int
 
-// GameOptions holds configuration for the game
-type gameOptions struct {
-	Mode gameMode
-}
-
 // Game2D implements 2D rendering
 type game2D struct {
+	app ebiten.Game
 	//a := app.App()
 	//scene := core.NewNode()
 }
 
 // Game3D implements 3D rendering
 type game3D struct {
-	app      *app.Application
-	scene    *core.Node
-	camera   *camera.Camera
-	renderer *renderer.Renderer
+	App      *app.Application
+	Scene    *core.Node
+	Camera   *camera.Camera
+	Renderer *renderer.Renderer
 	//window    *window.Window
 	//gui       *gui.GUI
-	lightNode *core.Node
+	LightNode *core.Node
 }
 
 // TitleScreen manages the main menu
-type titleScreen struct {
-	renderer Renderer
-	options  gameOptions
+type TitleScreen struct {
+	renderer Renderer // You can pass in either the game3D or game2D struct to here and call this property
 }
 
-type Game struct {
-	Mode    gameMode
-	Options gameOptions
-	Game2D  game2D
-	Game3D  game3D
-	Title   titleScreen
+type Options struct {
+	Mode   gameMode
+	Game2D game2D
+	Game3D game3D
 }
 
 // Renderer interface defines what any rendering system must implement
@@ -69,11 +63,6 @@ type Renderer interface {
 	Cleanup() error
 }
 
-// Cleanup implements Renderer for 2D.
-func (g *Game) Cleanup() error {
-	panic("unimplemented")
-}
-
 // Cleanup implements Renderer.
 func (g *game2D) Cleanup() error {
 	panic("unimplemented")
@@ -81,6 +70,12 @@ func (g *game2D) Cleanup() error {
 
 // Render implements Renderer.
 func (g *game2D) Render() error {
+	// Rendering will be getting the images from campaign/Locations
+	// And adding it as the player progresses through the game
+	// Needs to be scaled to 2D
+	// For each random area, there must be a item they can pick up and it should be randomized
+	// A map would suffice and we need to keep track of the player's location and that would be the key for the map
+	// If anything fails call in the cleanup property
 	panic("unimplemented")
 }
 
@@ -91,22 +86,29 @@ func (g *game3D) Cleanup() error {
 
 // Render implements Renderer.
 func (g *game3D) Render() error {
-	panic("unimplemented")
-}
-
-// Render implements Renderer for 2D.
-func (g *Game) Render() error {
+	// Rendering will be getting the images from campaign/Locations
+	// And adding it as the player progresses through the game
+	// Needs to be scaled to 2D
+	// For each random area, there must be a item they can pick up and it should be randomized
+	// A map would suffice and we need to keep track of the player's location and that would be the key for the map
+	// If anything fails call in the cleanup property
 	panic("unimplemented")
 }
 
 // Initialize the 2D renderer
 func (g *game2D) Initialize() error {
-	// Initialize 2D graphics (could use Ebiten here)
+	// Needs to scale the box to fit the device screen
+	// Need to load the titlescreen.png or .jpg in
+	// Needs to be scaled and it needs to have click any button
+	// It needs to be done using ebitin library
 	return nil
 }
 
 // Initialize the 3D renderer
 func (g *game3D) Initialize() error {
+	// TODO: Most of the variables in this function are not needed
+	// You can use the Game3D and pass it into this property
+
 	// Create application and scene
 	a := app.App()
 	scene := core.NewNode()
@@ -169,20 +171,24 @@ func (g *game3D) Initialize() error {
 }
 
 // CreateRenderer factory function to create appropriate renderer
-func CreateGame(options *Game) *Game {
-	switch options.Mode {
+func CreateGame(game *Options) *Options {
+	switch game.Mode {
 	case 1:
 		init := &game3D{
-			app:    app.App(),
-			scene:  core.NewNode(),
-			camera: camera.New(1),
+			App:    app.App(),
+			Scene:  core.NewNode(),
+			Camera: camera.New(1),
 			//renderer: renderer.New(),
-			lightNode: core.NewNode(),
+			LightNode: core.NewNode(),
 		}
-		options.Game3D = *init
-		return options
+		game.Game3D = *init
+		return game
 	default:
-		//return &game2D{}
+		/*init := &game2D{
+			app: ebiten.Game,
+		}*/
+		//game.Game2D = *init
+		return game
+
 	}
-	panic("Failed to initalize the game in 2D or 3D!")
 }
