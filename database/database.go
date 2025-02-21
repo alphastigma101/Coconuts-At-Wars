@@ -271,12 +271,12 @@ func (T *SaveTable) Delete(db *gorm.DB) {
 }
 
 // SerializeGame converts the Game struct into JSON for storage
-func Serialize(g interface{}) (string, error) {
+func Serialize(g interface{}) string {
 	gameJSON, err := json.Marshal(g)
 	if err != nil {
-		return "", err
+		return ""
 	}
-	return string(gameJSON), nil
+	return string(gameJSON)
 }
 
 // DeserializeGame converts JSON back into a Game struct

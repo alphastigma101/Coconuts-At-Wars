@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	//"input_handler/render2d"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -25,47 +27,67 @@ func generateKey() uint64 {
 }
 
 func DB(db *gorm.DB, tableData *database.Table, gameData *game.Game) (*database.Table, *game.Game) {
-	tableJSON, err := database.Serialize(&tableData)
-	if err != nil {
-		tableData = &database.Table{
-			Game:      &database.GameTable{},
-			Options:   &database.DndTable{},
-			Campaign:  &database.CampaignTable{},
-			Weapons:   &database.WeaponsTable{},
-			Locations: &database.LocationsTable{},
-			Load:      &database.LoadTable{},
-			Save:      &database.SaveTable{},
-		}
-	} else {
-		var existingGameTable database.GameTable
-		err := database.Deserialize(existingGameTable.TableData, &tableData)
-		if err != nil {
-			panic("Failed to deserialize game: " + err.Error())
-		}
-	}
+	tableData.Game = &database.GameTable{}
 	if !db.Migrator().HasTable(&tableData.Game) {
-		gameData.Options.GameMode = 0
+		tableData = &database.Table{
+			Game: &database.GameTable{
+				Refer: generateKey(),
+			},
+			Options: &database.OptionsTable{
+				OptionsID: generateKey(),
+			},
+			Dnd: &database.DndTable{
+				DndRefer: generateKey(),
+			},
+			Campaign: &database.CampaignTable{
+				CampaignRefer: generateKey(),
+			},
+			Weapons: &database.WeaponsTable{
+				WeaponsRefer: generateKey(),
+			},
+			Locations: &database.LocationsTable{
+				LocationsRefer: generateKey(),
+			},
+			Load: &database.LoadTable{
+				LoadID: generateKey(),
+			},
+			Save: &database.SaveTable{
+				SaveRefer: generateKey(),
+			},
+		}
+		tableJSON := database.Serialize(tableData)
+		if tableJSON == "" {
+			panic("Failed to serialize!")
+		}
+		gameData.Options = &options.Options{
+			GameMode: 0,
+		}
 		fmt.Println("GameTable does not exist. Creating new table and game entry.")
 		// Create the table
 		tableData.Game.Init(db)
 		// Create a new Game entry
-		gameJSON, err := database.Serialize(&gameData)
-		if err != nil {
-			panic("Failed to serialize game: " + err.Error())
+		gameJSON := database.Serialize(gameData)
+		if gameJSON == "" {
+			panic("Failed to serialize game: ")
 		}
-		newGame := database.GameTable{
-			Refer:     generateKey(),
-			GameData:  gameJSON,
-			TableData: tableJSON,
-		}
-		db.Create(&newGame)
+		GameTable := tableData.Game.(*database.GameTable)
+		GameTable.GameData = gameJSON
+		GameTable.TableData = tableJSON
+		db.Create(&GameTable)
 	} else {
-		//fmt.Println("GameTable exists. Initializing existing game entry.")
-		var existingGameTable database.GameTable
-		err := database.Deserialize(existingGameTable.GameData, &gameData)
-		if err != nil {
-			panic("Failed to deserialize game: " + err.Error())
+		GameTable := tableData.Game.(*database.GameTable)
+		result := db.Find(&GameTable)                   // select * from GameTable;
+		currentTableData, ok := result.Get("TableData") // Search for the specific key
+		if !ok {
+			panic("TableData was not successfully stored!")
 		}
+		tableData = currentTableData.(*database.Table)
+		currentGameData, ok := result.Get("GameData") // Search for the specific key
+		if !ok {
+			panic("GameData was not successfully stored!")
+		}
+		gameData = currentGameData.(*game.Game)
+
 	}
 	return tableData, gameData
 }
@@ -83,33 +105,29 @@ func main() {
 		opts := *(options.UpdateOptions(app.Options))
 		app.Options = &opts
 		app.Options.Game3D.InitializeTitleScreen() // Initalize the game startup
-		table.Game.Update(db, &app)
+		table.Game.Update(db, &app)                // Updates when it needs too
 	} else {
 		opts := *(options.UpdateOptions(app.Options))
 		app.Options = &opts
 		app.Options.Game2D.InitializeTitleScreen() // Initalize the game startup
-		table.Game.Update(db, &app)
+		table.Game.Update(db, &app)                // Updates when it needs too
 	}
-	// Need a handful of if statements that pull in the start menu of the game
-	// It will display the game with three coconuts huddle around
-	// Two of them will have army helments while the other coconut on the far right will have
-	// A mullet. Everytime the user starts up the game the coconut with the mullet will have different cosmetics
-	// Such as googles, a cone on its head, etc
-	// They will be huddled around a gray-ish steel circlular object which the landscape will be mud while airplanes fly around
-	// Similar to inheritance because an interface needs some object that implements
-	// it's properties
 	actor := input.GameActor{
 		Health: 100,
 	}
-	handler := &input.InputHandler{
-		ButtonX: &input.JumpCommand{},
-		ButtonY: &input.FireCommand{},
-		ButtonA: &input.DuckCommand{},
-		ButtonB: &input.ReloadCommand{},
-	}
+	// Game Loop
+	gameStart := true
+	for gameStart != false {
+		handler := &input.InputHandler{
+			ButtonX: &input.JumpCommand{},
+			ButtonY: &input.FireCommand{},
+			ButtonA: &input.DuckCommand{},
+			ButtonB: &input.ReloadCommand{},
+		}
 
-	command := input.HandleInput(handler)
-	if command != nil {
-		command.Execute(&actor)
+		command := input.HandleInput(handler)
+		if command != nil {
+			command.Execute(&actor)
+		}
 	}
 }
