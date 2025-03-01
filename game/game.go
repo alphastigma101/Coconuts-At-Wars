@@ -15,4 +15,5 @@ type Game struct {
 	Campaign    *main_game.MainGame
 	Dnd         *dnd.Dnd
 	Cooperative *coop.Cooperative
+	Players     *dnd.Player
 }

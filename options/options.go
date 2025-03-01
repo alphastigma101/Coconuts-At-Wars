@@ -13,6 +13,11 @@ type dndMode int
 // An interface that defines a 2D rendering system must implement
 type render interface {
 	InitializeTitleScreen() interface{}
+	//InitializeMainMenuScreen() interface{}
+	//InitializeOptionsScreen() interface{}
+	//InitializeLoadScreen() interface{}
+	//InitializeCampaignScreen() interface{}
+	//InitializeDndScreen() interface{}
 }
 
 type game2D struct {
@@ -80,17 +85,23 @@ func (g game2D) InitializeTitleScreen() interface{} {
 	pos := r1.GetWindowPosition()
 
 	// Load and check image
-	image := r1.LoadImage("./assets/titlescreen.png")
+	image := r1.LoadImage("./assests/titlescreen.png")
 	if image == nil {
 		panic("failed to load titlescreen image")
 	}
-
+	// TODO: Convert the image into a 2D image here
 	// Convert image to texture for rendering
 	texture := r1.LoadTextureFromImage(image)
-
+	texture.Height = int32(r1.GetScreenHeight())
+	texture.Width = int32(r1.GetScreenWidth())
 	// Free the image data since we've converted it to texture
 	r1.UnloadImage(image)
-
+	r1.BeginDrawing()
+	r1.DrawTexture(texture, 0, 0, r1.White)
+	// Draw start game prompt
+	r1.DrawText("PRESS ANY BUTTON TO START", 240, 400, 20, r1.White)
+	r1.EndDrawing()
+	r1.UnloadTexture(texture)
 	// Store all the data in the game2D struct
 	g.Position = &pos
 	g.DPI = &dpi

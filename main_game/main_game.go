@@ -5,9 +5,11 @@ import (
 )
 
 type MainGame struct {
-	players dnd.Players
+	Players dnd.Player
 	Enemies map[string]string // Stores the images that will be either rendered in 2D or 3D
 }
+
+type SaveData map[uint]*MainGame // Represents the progress through the game
 
 func (d *MainGame) Campaign() {
 	panic("Function has not been implemented yet!")
