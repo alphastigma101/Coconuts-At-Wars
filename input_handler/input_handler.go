@@ -5,11 +5,9 @@ import (
 	"fmt"
 
 	term "github.com/nsf/termbox-go"
+	// My own Modules
+	game "github.com/alphastigma101/Coconuts-At-Wars/game"
 )
-
-type GameActor struct {
-	Health int
-}
 
 const (
 	// Support for controllers
@@ -27,7 +25,7 @@ const (
 )
 
 type Command interface {
-	Execute(actor *GameActor)
+	Execute(actor *game.Actor)
 }
 
 type InputHandler struct {
@@ -42,42 +40,42 @@ type InputHandler struct {
 
 type JumpCommand struct{}
 
-func (j JumpCommand) jump(actor *GameActor) {
+func (j JumpCommand) jump(actor *game.Actor) {
 
 }
 
-func (j *JumpCommand) Execute(actor *GameActor) {
+func (j *JumpCommand) Execute(actor *game.Actor) {
 	j.jump(actor)
 }
 
 // Struct that represents the fire command
 type FireCommand struct{}
 
-func (f FireCommand) fireGun(actor *GameActor) {
+func (f FireCommand) fireGun(actor *game.Actor) {
 
 }
 
-func (f *FireCommand) Execute(actor *GameActor) {
+func (f *FireCommand) Execute(actor *game.Actor) {
 	f.fireGun(actor)
 }
 
 type DuckCommand struct{}
 
-func (d DuckCommand) duck(actor *GameActor) {
+func (d DuckCommand) duck(actor *game.Actor) {
 
 }
 
-func (d *DuckCommand) Execute(actor *GameActor) {
+func (d *DuckCommand) Execute(actor *game.Actor) {
 	d.duck(actor)
 }
 
 type ReloadCommand struct{}
 
-func (r ReloadCommand) reload(actor *GameActor) {
+func (r ReloadCommand) reload(actor *game.Actor) {
 
 }
 
-func (r *ReloadCommand) Execute(actor *GameActor) {
+func (r *ReloadCommand) Execute(actor *game.Actor) {
 	r.reload(actor)
 }
 

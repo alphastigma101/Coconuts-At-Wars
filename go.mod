@@ -3,7 +3,7 @@ module input_handler
 go 1.22.2
 
 require (
-	github.com/alphastigma101/Coconuts-At-Wars v0.0.0-20250215033519-c3f2d76324cf
+	github.com/alphastigma101/Coconuts-At-Wars v0.0.0-20250301210605-eb0c9abbc1d7
 	gorm.io/gorm v1.25.12
 )
 

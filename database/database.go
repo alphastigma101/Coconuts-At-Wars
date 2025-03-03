@@ -8,7 +8,9 @@ import (
 
 	// My Modules
 	dnd "github.com/alphastigma101/Coconuts-At-Wars/Dnd"
-	"github.com/alphastigma101/Coconuts-At-Wars/game"
+	"github.com/alphastigma101/Coconuts-At-Wars/game" // Move the interface Properties into layout.go and modify the table struct so it calls them
+
+	// However, The table struct needs to be the parameter of each property
 	"github.com/alphastigma101/Coconuts-At-Wars/main_game"
 	"github.com/alphastigma101/Coconuts-At-Wars/options"
 
@@ -103,7 +105,7 @@ type Properties interface {
 }
 
 type Table struct {
-	Game      Properties
+	Game      game.DataBaseProperties
 	Options   Properties
 	Dnd       Properties
 	Campaign  Properties
