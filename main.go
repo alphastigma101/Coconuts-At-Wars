@@ -16,6 +16,9 @@ func main() {
 	tempTable, tempGameTable := table.Game.Init(table, app)
 	table = tempTable.(database.Table)
 	app = tempGameTable.(game.Game)
+	// Initialize window first
+	r1.InitWindow(800, 450, "Coconuts At Wars")
+	r1.SetTargetFPS(60)
 	if app.Options.GameMode == 1 {
 		table.Options = &database.OptionsTable{}
 		//tempOptionTable, tempGameTable := table.Options.Init(db, table, app)

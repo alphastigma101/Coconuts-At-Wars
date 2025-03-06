@@ -237,9 +237,6 @@ type Game2D struct {
 }
 
 func (g Game2D) InitializeTitleScreen() interface{} {
-	// Initialize window first
-	r1.InitWindow(800, 450, "Coconuts At Wars")
-	r1.SetTargetFPS(60)
 
 	// Load and check image
 	image := LoadImage("./assests/titlescreen.png")
@@ -284,19 +281,18 @@ func roundOdd(num int) int {
 }
 
 func freeResources(images []*Image, textures []Texture2D) {
-	for i := range images {
+	/*for i := range images {
 		if images[i] != nil {
 			UnloadImage(*images[i])
 		}
-		if textures[i].ID != 0 {
-			UnloadTexture(textures[i])
-		}
-	}
+		//if textures[i].ID != 0 {
+		//UnloadTexture(textures[i])
+		//}
+	}*/
 
 }
 func (g Game2D) InitializeMainMenuScreen(Game GameRenderer) {
 	BeginDrawing()
-	r1.InitAudioDevice() // Initialize audio
 	imageFiles := []string{
 		"./assests/Dry WarZone.jpg",
 		"./assests/Frozen WarZone.png",
@@ -325,8 +321,6 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer) {
 	// Menu options
 	menuOptions := []string{"Campaign", "Load", "Dnd", "Options", "Exit"}
 	selectedOption := 0
-
-	// Main r1.loop for menu
 	exitMenu := false
 	init := false
 	for !exitMenu && !WindowShouldClose() {
