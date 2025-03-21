@@ -1,3 +1,8 @@
+/*
+This is the database module. It keeps track of the game's current state based on A unique id
+It will use types from the game module which the game module includes a module called layout
+Which is the whole layout of the game
+*/
 package database
 
 import (
@@ -15,6 +20,7 @@ import (
 	"github.com/alphastigma101/Coconuts-At-Wars/options"
 
 	// main.go also imports these modules:
+	Layout "github.com/alphastigma101/Coconuts-At-Wars/layout"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -96,25 +102,6 @@ func generateKey() uint {
 	return uint(binary.BigEndian.Uint32(b[:]))
 }
 
-type Properties interface {
-	Init(table interface{}, Game interface{}) (interface{}, interface{})
-	Update(game interface{})
-	Insert(db *gorm.DB)
-	Query(db *gorm.DB)
-	Delete(db *gorm.DB)
-}
-
-type Table struct {
-	Game      game.DataBaseProperties
-	Options   Properties
-	Dnd       Properties
-	Campaign  Properties
-	Weapons   Properties
-	Locations Properties
-	Load      Properties
-	Save      Properties
-}
-
 // Creates a file called game.db with GameTable struct
 // Each struct is stored via by referencing it inside the Table Struct
 func (T *GameTable) Init(table interface{}, Game interface{}) (interface{}, interface{}) {
@@ -122,7 +109,7 @@ func (T *GameTable) Init(table interface{}, Game interface{}) (interface{}, inte
 	if err != nil {
 		panic("failed to connect database")
 	}
-	tableData := table.(Table) // Check to see if it is the Table struct
+	tableData := table.(Layout.Table) // Check to see if it is the Table struct
 	gameData := Game.(game.Game)
 	tableData.Game = &GameTable{}
 	// Check to see if the Game property table has been created
@@ -152,6 +139,13 @@ func (T *GameTable) Init(table interface{}, Game interface{}) (interface{}, inte
 		}
 		Deserialize(GameTable.GameData, &gameData)
 	}
+	tableData.Options = &OptionsTable{}
+	tableData.Campaign = &CampaignTable{}
+	tableData.Dnd = &DndTable{}
+	tableData.Load = &LoadTable{}
+	tableData.Locations = &LocationsTable{}
+	tableData.Save = &SaveTable{}
+	tableData.Weapons = &WeaponsTable{}
 	return tableData, gameData
 }
 
@@ -190,14 +184,12 @@ func (T *OptionsTable) Init(optionsTable interface{}, Game interface{}) (interfa
 	if err != nil {
 		panic("failed to connect database")
 	}
-	tableData := optionsTable.(Table)
-	gameData := Game.(game.Game)
-	tableData.Options = &OptionsTable{} // Allocate memory on the heap
+	tableData := optionsTable.(Layout.Table)
+	opts := Game.(options.Options)
 	if !db.Migrator().HasTable(&tableData.Options) {
 		tableData.Options = &OptionsTable{
 			OptionsID: generateKey(),
 		}
-		opts := gameData.Options
 		optionsTableJSON := Serialize(opts)
 		if optionsTableJSON == "" {
 			panic("Failed to serialize!")
@@ -213,7 +205,7 @@ func (T *OptionsTable) Init(optionsTable interface{}, Game interface{}) (interfa
 		if result.Error != nil {
 			panic("failed to retrieve game tables!")
 		}
-		Deserialize(OptionTable.OptionsData, &gameData.Options)
+		Deserialize(OptionTable.OptionsData, &opts)
 	}
 	return optionsTable, Game
 }

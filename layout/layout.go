@@ -13,6 +13,19 @@ type Properties interface {
 	Update(game interface{})
 }
 
+type table struct {
+	Game      Properties
+	Options   Properties
+	Dnd       Properties
+	Campaign  Properties
+	Weapons   Properties
+	Locations Properties
+	Load      Properties
+	Save      Properties
+}
+
+type Table table
+
 // Use this function for collision in 2D:
 //
 //	CheckCollisionLines
@@ -141,6 +154,8 @@ func DrawRectangle(posX int32, posY int32, width int32, height int32, col Color)
 var KeyDown int = r1.KeyDown
 var KeyUp int = r1.KeyUp
 var KeyEnter int = r1.KeyEnter
+var KeyRight int = r1.KeyRight
+var KeyLeft int = r1.KeyLeft
 
 // Key Event Functions
 func IsKeyPressed(keyDown int) bool {
@@ -172,6 +187,9 @@ func GetWindowScaleDPI() Position {
 func GetTime() float64 {
 	return r1.GetTime()
 }
+func GetKeyPressed() int32 {
+	return r1.GetKeyPressed()
+}
 
 // FPS settings
 func SetTargetFPS(fps int32) {
@@ -190,7 +208,7 @@ type Mesh *r1.Mesh // It is apart of the 3D model
 type Box *r1.BoundingBox // Can be used for hitbox that can be placed on the player
 
 type GameRenderer interface {
-	InitializeOptionsScreen() interface{}
+	InitializeOptionsScreen(table *Table) (interface{}, interface{})
 	//InitializeLoadScreen() interface{}
 	InitializeCampaignScreen()
 	//InitializeDndScreen() interface{}
@@ -199,7 +217,7 @@ type GameRenderer interface {
 // An interface that defines a 2D rendering system must implement
 type Render interface {
 	InitializeTitleScreen() interface{}
-	InitializeMainMenuScreen(Game GameRenderer)
+	InitializeMainMenuScreen(Game GameRenderer, table *Table)
 }
 type mainMenu struct {
 	Rectangle Rectangle
@@ -280,18 +298,9 @@ func roundOdd(num int) int {
 	return num
 }
 
-func freeResources(images []*Image, textures []Texture2D) {
-	/*for i := range images {
-		if images[i] != nil {
-			UnloadImage(*images[i])
-		}
-		//if textures[i].ID != 0 {
-		//UnloadTexture(textures[i])
-		//}
-	}*/
-
-}
-func (g Game2D) InitializeMainMenuScreen(Game GameRenderer) {
+func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
+	// TODO: CPU is too fast and it still detects the input enter, and it will execute the campaign function so it needs to be reseted
+	ClearBackground(Color{R: Black.R, G: Black.G, B: Black.B, A: Black.A})
 	BeginDrawing()
 	imageFiles := []string{
 		"./assests/Dry WarZone.jpg",
@@ -334,26 +343,22 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer) {
 			// Process selection
 			switch menuOptions[selectedOption] {
 			case "Campaign":
-				freeResources(images, textures)
-				Game.InitializeCampaignScreen()
-				exitMenu = true
+				//Game.InitializeCampaignScreen()
+				//exitMenu = true
 			case "Load":
-				freeResources(images, textures)
 				//g.Event = EventLoad
 				exitMenu = true
 			case "Dnd":
 				// Call in the Dnd screen function and before loading anyting
 				// We need to check and see if DndMode is enabled
 				// If not return it back to here and make a warning pop up box
-				freeResources(images, textures)
 				//g.Event = EventDnd
 				exitMenu = true
 			case "Options":
-				freeResources(images, textures)
-				//g.Event = EventOptions
+				//freeResources(images, textures)
+				Game.InitializeOptionsScreen(table)
 				exitMenu = true
 			case "Exit":
-				freeResources(images, textures)
 				g.InitializeTitleScreen()
 			}
 		}
