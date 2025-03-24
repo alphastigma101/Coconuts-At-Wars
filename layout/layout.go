@@ -219,15 +219,6 @@ type Render interface {
 	InitializeTitleScreen() interface{}
 	InitializeMainMenuScreen(Game GameRenderer, table *Table)
 }
-type mainMenu struct {
-	Rectangle Rectangle
-	Color     Color
-	Active    bool
-}
-
-type layout struct {
-	MainMenu *mainMenu
-}
 
 type Game2D struct {
 	VertexBuffer VertexBuffer
@@ -248,14 +239,12 @@ type Game2D struct {
 	// Use LoadAudioStream if you're using custom audio splices
 	AudioStream AudioStream // Create custom audio streams not bound to a specific file
 	// Use LoadAutomationEventList to load in
-	Event      Event
-	EventList  EventList
-	Scenes     map[string]*Game2D // Store all the images that have been scaled
-	GameLayout *layout
+	Event     Event
+	EventList EventList
+	Scenes    map[string]*Game2D // Store all the images that have been scaled
 }
 
 func (g Game2D) InitializeTitleScreen() interface{} {
-
 	// Load and check image
 	image := LoadImage("./assests/titlescreen.png")
 	if image == nil {
@@ -299,8 +288,6 @@ func roundOdd(num int) int {
 }
 
 func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
-	// TODO: CPU is too fast and it still detects the input enter, and it will execute the campaign function so it needs to be reseted
-	ClearBackground(Color{R: Black.R, G: Black.G, B: Black.B, A: Black.A})
 	BeginDrawing()
 	imageFiles := []string{
 		"./assests/Dry WarZone.jpg",
@@ -310,7 +297,7 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 
 	// Create array of image pointers
 	images := make([]*Image, len(imageFiles))
-
+	selectedOption := 0
 	// Load all images
 	for i, file := range imageFiles {
 		images[i] = LoadImage(file)
@@ -329,10 +316,8 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 
 	// Menu options
 	menuOptions := []string{"Campaign", "Load", "Dnd", "Options", "Exit"}
-	selectedOption := 0
-	exitMenu := false
 	init := false
-	for !exitMenu && !WindowShouldClose() {
+	for !WindowShouldClose() {
 		pressed := r1.GetKeyPressed()
 		// Handle events and input
 		if r1.IsKeyPressed(int32(KeyDown)) || pressed == 264 {
@@ -343,21 +328,15 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 			// Process selection
 			switch menuOptions[selectedOption] {
 			case "Campaign":
-				//Game.InitializeCampaignScreen()
-				//exitMenu = true
+				Game.InitializeCampaignScreen()
 			case "Load":
 				//g.Event = EventLoad
-				exitMenu = true
 			case "Dnd":
 				// Call in the Dnd screen function and before loading anyting
 				// We need to check and see if DndMode is enabled
 				// If not return it back to here and make a warning pop up box
-				//g.Event = EventDnd
-				exitMenu = true
 			case "Options":
-				//freeResources(images, textures)
 				Game.InitializeOptionsScreen(table)
-				exitMenu = true
 			case "Exit":
 				g.InitializeTitleScreen()
 			}
@@ -393,19 +372,6 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 		// Draw menu box
 		menuX := int32(GetScreenWidth())/2 - 100
 		menuY := int32(GetScreenHeight()) / 2
-
-		// Store menu
-		if g.GameLayout == nil {
-			g.GameLayout = &layout{}
-			g.GameLayout.MainMenu = &mainMenu{
-				Rectangle: Rectangle{
-					X:      float32(menuX),
-					Y:      float32(menuY),
-					Width:  200,
-					Height: float32(len(menuOptions) * 40),
-				},
-			}
-		}
 
 		// Draw the menu box
 		col := Color{R: Black.R, G: Black.G, B: Black.B, A: Black.A}

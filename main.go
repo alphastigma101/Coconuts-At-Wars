@@ -24,14 +24,16 @@ func main() {
 		updatedOpts, updatedTable := options.UpdateOptions(app.Options, &table)
 		app.Options = updatedOpts
 		table = updatedTable.(Layout.Table)
-		app.Options.Game3D.InitializeTitleScreen() // Initalize the game startup
-		app.Options.Game3D.InitializeMainMenuScreen(&app, &table)
+		//app.Game3D = Layout.Game3D{}
+		//app.Options.Game3D.InitializeTitleScreen() // Initalize the game startup
+		//app.Options.Game3D.InitializeMainMenuScreen(&app, &table)
 	} else {
 		updatedOpts, updatedTable := options.UpdateOptions(app.Options, &table)
 		app.Options = updatedOpts
 		table = updatedTable.(Layout.Table)
-		app.Options.Game2D.InitializeTitleScreen() // Initalize the game startup
-		app.Options.Game2D.InitializeMainMenuScreen(&app, &table)
+		app.Game2D = Layout.Game2D{}
+		app.Game2D.InitializeTitleScreen() // Initalize the game startup
+		app.Game2D.InitializeMainMenuScreen(&app, &table)
 	}
 	if app.GameActor == nil {
 		app.GameActor = &game.Actor{

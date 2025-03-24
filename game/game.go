@@ -5,6 +5,7 @@ package game
 
 // This Module holds the Game struct which consists of nested structs that keeps track of the user's data
 import (
+
 	// My modules
 	dnd "github.com/alphastigma101/Coconuts-At-Wars/Dnd"
 	coop "github.com/alphastigma101/Coconuts-At-Wars/cooperative"
@@ -38,6 +39,8 @@ type Game struct {
 	Cooperative *coop.Cooperative
 	Players     *dnd.Player
 	GameActor   *Actor
+	Game2D      Layout.Render
+	Game3D      Layout.Render
 }
 
 func (g *Game) InitializeCampaignScreen() {
@@ -60,8 +63,7 @@ func (g *Game) InitializeOptionsScreen(table *Layout.Table) (interface{}, interf
 	if g.Options.GameMode == 1 {
 		// Do stuff for 3D
 	} else {
-		exitMenu := false
-		for !exitMenu && !Layout.WindowShouldClose() {
+		for !Layout.WindowShouldClose() {
 			pressed := Layout.GetKeyPressed()
 			// Handle events and input
 			if Layout.IsKeyPressed(Layout.KeyDown) || pressed == 264 {
@@ -72,9 +74,8 @@ func (g *Game) InitializeOptionsScreen(table *Layout.Table) (interface{}, interf
 				// Process selection
 				switch menuOptions[selectedOption] {
 				case "Exit":
-					exitMenu = true
 					Layout.ClearBackground(Layout.Color{R: Layout.Black.R, G: Layout.Black.G, B: Layout.Black.B, A: Layout.Black.A})
-					g.Options.Game2D.InitializeMainMenuScreen(g, table) // If user clicks exit, go back to main menu screen
+					return g, table
 				}
 			} else if Layout.IsKeyPressed(Layout.KeyLeft) || pressed == 263 {
 				// Handle left arrow for decreasing value

@@ -15,18 +15,14 @@ type dndMode int
 type Options struct {
 	GameMode gameMode
 	DndMode  dndMode
-	Game2D   Layout.Render
-	Game3D   Layout.Render
 }
 
 // CreateRenderer factory function to create appropriate renderer
 func UpdateOptions(opts *Options, table *Layout.Table) (*Options, interface{}) {
 	if opts.GameMode == 1 {
 		// Need to update the Options Table
-		//game.Game3D = Layout.GetGame3D()
 		return opts, table
 	} else {
-		opts.Game2D = Layout.GetGame2D()
 		newTable, newOpts := table.Options.Init(*table, *opts)
 		// Update the underlying variable
 		tempTable := newTable.(Layout.Table)
