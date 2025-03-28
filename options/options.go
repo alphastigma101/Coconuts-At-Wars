@@ -11,10 +11,12 @@ import (
 // GameMode represents the dimension type (2D or 3D)
 type gameMode int
 type dndMode int
+type coopMode int
 
 type Options struct {
 	GameMode gameMode
 	DndMode  dndMode
+	CoopMode coopMode
 }
 
 // CreateRenderer factory function to create appropriate renderer

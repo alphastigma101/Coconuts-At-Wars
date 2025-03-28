@@ -12,11 +12,10 @@ import (
 	"encoding/json"
 
 	// My Modules
-	dnd "github.com/alphastigma101/Coconuts-At-Wars/Dnd"
+
 	"github.com/alphastigma101/Coconuts-At-Wars/game" // Move the interface Properties into layout.go and modify the table struct so it calls them
 
 	// However, The table struct needs to be the parameter of each property
-	"github.com/alphastigma101/Coconuts-At-Wars/main_game"
 	"github.com/alphastigma101/Coconuts-At-Wars/options"
 
 	// main.go also imports these modules:
@@ -404,24 +403,24 @@ func (T *LoadTable) Init(i interface{}, Game interface{}) (interface{}, interfac
 // Load interface will be an instance of this: map[uint]map[string][]string
 // It will be this basically map[LoadID]["Dnd" or "Campaign"][an array of saved files in the form of a string literal]
 func (T *LoadTable) Update(playerData interface{}) {
-	db, err := gorm.Open(sqlite.Open("./database/load.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	var existingGameTable LoadTable
-	data := playerData.(game.Game)
-	strMap := "" // Use the Serialize function to transform the data into string
-	if data.Options.DndMode == 1 {
-		var temp dnd.SavedData
-		Deserialize(existingGameTable.LoadData, temp)
-		//dndArr := T.Load[T.LoadID]["Dnd"]
-		// Compare the data.Dnd.SavedData
+	//db, err := gorm.Open(sqlite.Open("./database/load.db"), &gorm.Config{})
+	//if err != nil {
+	//panic("failed to connect database")
+	//}
+	//var existingGameTable LoadTable
+	//data := playerData.(game.Game)
+	//strMap := "" // Use the Serialize function to transform the data into string
+	//if data.Options.DndMode == 1 {
+	//var temp dnd.SavedData
+	//Deserialize(existingGameTable.LoadData, temp)
+	//dndArr := T.Load[T.LoadID]["Dnd"]
+	// Compare the data.Dnd.SavedData
 
-	}
-	var temp main_game.SaveData
-	Deserialize(existingGameTable.LoadData, temp)
+	//}
+	//var temp main_game.SaveData
+	//Deserialize(existingGameTable.LoadData, temp)
 	//campaignArr := T.Load[T.LoadID]["Campaign"]
-	db.Model(&existingGameTable).Update("LoadData", strMap)
+	//db.Model(&existingGameTable).Update("LoadData", strMap)
 }
 
 func (T *LoadTable) Insert(db *gorm.DB) {
