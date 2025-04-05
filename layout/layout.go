@@ -20,8 +20,6 @@ type table struct {
 	Campaign  Properties
 	Weapons   Properties
 	Locations Properties
-	Load      Properties
-	Save      Properties
 }
 
 type Table table
@@ -195,6 +193,9 @@ func GetKeyPressed() int32 {
 func SetTargetFPS(fps int32) {
 	r1.SetTargetFPS(fps)
 }
+func SetMasterVolume(volume float32) {
+	r1.SetMasterVolume(volume)
+}
 
 // Audio free-functions
 func InitAudioDevice() {
@@ -209,12 +210,17 @@ type Box *r1.BoundingBox // Can be used for hitbox that can be placed on the pla
 
 type GameRenderer interface {
 	InitializeOptionsScreen(table *Table) (interface{}, interface{})
-	//InitializeLoadScreen() interface{}
+	InitializeCoopScreen()
 	InitializeCampaignScreen()
-	//InitializeDndScreen() interface{}
+	InitializeDndScreen()
+	// Simple Getter Functions that check the user's settings and alters the main menu
+	IsDndEnabled() bool
+	IsCoopEnabled() bool
 }
 
-// An interface that defines a 2D rendering system must implement
+// An interface that defines the layout of the game
+// The functions inside here would be the parent functions that call other functions i.e the callee
+// Thus allowing the user to navigate properly
 type Render interface {
 	InitializeTitleScreen() interface{}
 	InitializeMainMenuScreen(Game GameRenderer, table *Table)
@@ -294,7 +300,6 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 		"./assests/Frozen WarZone.png",
 		"./assests/Muddy WarZone.png",
 	}
-
 	// Create array of image pointers
 	images := make([]*Image, len(imageFiles))
 	selectedOption := 0
@@ -305,42 +310,64 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 			panic("failed to load image: " + file)
 		}
 	}
-
 	// Create array for textures
 	textures := make([]Texture2D, len(images))
-
 	// Track current image index
 	currentImageIndex := 0
 	time := 0.0
 	intervalImageChange := 0
-
 	// Menu options
-	menuOptions := []string{"Campaign", "Load", "Dnd", "Options", "Exit"}
+	menuOptions := []string{"Campaign", "Coop", "Dnd", "Options", "Exit"}
 	init := false
 	for !WindowShouldClose() {
+		BeginDrawing()
+
 		pressed := r1.GetKeyPressed()
-		// Handle events and input
-		if r1.IsKeyPressed(int32(KeyDown)) || pressed == 264 {
-			selectedOption = (selectedOption + 1) % len(menuOptions)
-		} else if IsKeyPressed(KeyUp) || pressed == 265 {
-			selectedOption = (selectedOption - 1 + len(menuOptions)) % len(menuOptions)
-		} else if IsKeyPressed(KeyEnter) || pressed == 257 {
-			// Process selection
-			switch menuOptions[selectedOption] {
-			case "Campaign":
-				Game.InitializeCampaignScreen()
-			case "Load":
-				//g.Event = EventLoad
-			case "Dnd":
-				// Call in the Dnd screen function and before loading anyting
-				// We need to check and see if DndMode is enabled
-				// If not return it back to here and make a warning pop up box
-			case "Options":
-				Game.InitializeOptionsScreen(table)
-			case "Exit":
-				g.InitializeTitleScreen()
+
+		// Create a filtered list of visible menu options
+		visibleOptions := []string{}
+		visibleIndices := []int{}
+		for i, option := range menuOptions {
+			if (option == "Dnd" && !Game.IsDndEnabled()) ||
+				(option == "Coop" && !Game.IsCoopEnabled()) {
+				// Skip disabled options
+				continue
+			}
+			visibleOptions = append(visibleOptions, option)
+			visibleIndices = append(visibleIndices, i)
+		}
+
+		// Map the selectedOption to the visible options
+		visibleSelectedIndex := 0
+		for i, originalIndex := range visibleIndices {
+			if originalIndex == selectedOption {
+				visibleSelectedIndex = i
+				break
 			}
 		}
+
+		// Handle events and input
+		if r1.IsKeyPressed(int32(KeyDown)) || pressed == 264 {
+			visibleSelectedIndex = (visibleSelectedIndex + 1) % len(visibleOptions)
+			selectedOption = visibleIndices[visibleSelectedIndex]
+		} else if IsKeyPressed(KeyUp) || pressed == 265 {
+			visibleSelectedIndex = (visibleSelectedIndex - 1 + len(visibleOptions)) % len(visibleOptions)
+			selectedOption = visibleIndices[visibleSelectedIndex]
+		} else if IsKeyPressed(KeyEnter) || pressed == 257 {
+			// Process selection
+			if menuOptions[selectedOption] == "Campaign" {
+				Game.InitializeCampaignScreen()
+			} else if menuOptions[selectedOption] == "Options" {
+				Game.InitializeOptionsScreen(table)
+			} else if menuOptions[selectedOption] == "Exit" {
+				g.InitializeTitleScreen()
+			} else if menuOptions[selectedOption] == "Coop" && Game.IsCoopEnabled() {
+				Game.InitializeCoopScreen()
+			} else if menuOptions[selectedOption] == "Dnd" && Game.IsDndEnabled() {
+				Game.InitializeDndScreen()
+			}
+		}
+
 		if !init && intervalImageChange == 0 {
 			// Initialize the textures
 			textures[currentImageIndex] = LoadTextureFromImage(*images[currentImageIndex])
@@ -348,6 +375,7 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 			textures[currentImageIndex].Width = int32(GetScreenWidth())
 			init = true
 		}
+
 		if intervalImageChange == 1500 {
 			if textures[currentImageIndex].ID != 0 {
 				UnloadTexture(textures[currentImageIndex])
@@ -369,18 +397,18 @@ func (g Game2D) InitializeMainMenuScreen(Game GameRenderer, table *Table) {
 		ClearBackground(Color{R: Black.R, G: Black.G, B: Black.B, A: Black.A})
 		DrawTexture(textures[currentImageIndex], 0, 0, Color{R: White.R, G: White.G, B: White.B, A: White.A})
 
-		// Draw menu box
+		// Draw menu box - size based on visible options only
 		menuX := int32(GetScreenWidth())/2 - 100
 		menuY := int32(GetScreenHeight()) / 2
 
-		// Draw the menu box
+		// Draw the menu box - scaled by visible options count
 		col := Color{R: Black.R, G: Black.G, B: Black.B, A: Black.A}
-		DrawRectangle(menuX, menuY, 200, int32(len(menuOptions)*40), ColorAlpha(col, 0.7))
+		DrawRectangle(menuX, menuY, 200, int32(len(visibleOptions)*40), ColorAlpha(col, 0.7))
 
-		// Draw menu options
-		for i, option := range menuOptions {
+		// Draw visible menu options only
+		for i, option := range visibleOptions {
 			textColor := Color{R: White.R, G: White.G, B: White.B, A: White.A}
-			if i == selectedOption {
+			if visibleIndices[i] == selectedOption {
 				textColor = Color{R: r1.Red.R, G: r1.Red.G, B: r1.Red.B, A: r1.Red.A}
 				col = Color{R: Gray.R, G: Gray.G, B: Gray.B, A: Gray.A}
 				DrawRectangle(menuX, menuY+int32(i*40), 200, 40, ColorAlpha(col, 0.3))

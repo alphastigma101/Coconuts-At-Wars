@@ -17,18 +17,35 @@ type Player struct {
 	Actor   interface{}        // There is a struct called gameActor or similar to that, it will be initialized with this field
 }
 
-type Dnd struct {
-	players  Player
-	Monsters map[string]string // Stores the images that will be either rendered in 2D or 3D
-	Weapons  map[string]string
-	NPCs     map[string]string
+type enemies struct {
+	Health int
+	Weapon bool
+	Actors map[string]string // Stores the images of monsters that will be either rendered in 2D or 3D
 }
 
-// Game struct has a Dnd field and there is a dnd table, therefore we can make this a type instead
-// Of storing it inside the struct
-type SavedData map[uint][]*Dnd // Represents the progress through the dnd game
+// Struct that keeps track of where the user is at in the game and will load them there
+type gameState struct {
+	Dungeon      bool
+	IceLand      bool
+	HotLand      bool
+	TropicalLand bool
+}
 
-func (d *Dnd) Campaign() {
+type Dnd struct {
+	players   Player
+	Weapons   map[string]string
+	NPCs      map[string]string
+	Monsters  enemies
+	GameState gameState
+}
+
+// During the dnd, if the user clicks a certain button, it will pop up a menu
+// They can either adjust game volume, exit, continue, and save and connect
+type gameOptions interface {
+	Options() interface{}
+}
+
+func Campaign(d *Dnd) {
 	panic("Function has not been implemented yet!")
 }
 

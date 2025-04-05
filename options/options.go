@@ -11,19 +11,20 @@ import (
 // GameMode represents the dimension type (2D or 3D)
 type gameMode int
 type dndMode int
-type coopMode int
-
+type sound int
+type coop int
 type Options struct {
 	GameMode gameMode
 	DndMode  dndMode
-	CoopMode coopMode
+	Coop     coop
+	Sound    sound
 }
 
 // CreateRenderer factory function to create appropriate renderer
-func UpdateOptions(opts *Options, table *Layout.Table) (*Options, interface{}) {
+func InitOptions(opts *Options, table *Layout.Table) (*Options, interface{}) {
 	if opts.GameMode == 1 {
 		// Need to update the Options Table
-		return opts, table
+		return opts, *table
 	} else {
 		newTable, newOpts := table.Options.Init(*table, *opts)
 		// Update the underlying variable

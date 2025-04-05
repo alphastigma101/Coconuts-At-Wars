@@ -19,6 +19,7 @@ import (
 	"github.com/alphastigma101/Coconuts-At-Wars/options"
 
 	// main.go also imports these modules:
+	dnd "github.com/alphastigma101/Coconuts-At-Wars/Dnd"
 	Layout "github.com/alphastigma101/Coconuts-At-Wars/layout"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -37,11 +38,7 @@ type GameTable struct {
 	locationsTable LocationsTable
 	// Each player can have multiple weapons
 	weaponsTable []WeaponsTable `gorm:"foreignKey:Refer;joinForeignKey:WeaponsReferID;References:WeaponsRefer;"`
-	// Each player can have multiple saved files
-	saveTable []SaveTable `gorm:"foreignKey:Refer;joinForeignKey:SaveReferID;References:SaveRefer;"`
-	// Each player can load one save file
-	loadTable LoadTable
-	GameData  string `gorm:"type:TEXT"` // JSON representation of the Game struct
+	GameData     string         `gorm:"type:TEXT"` // JSON representation of the Game struct
 }
 
 type OptionsTable struct {
@@ -76,20 +73,6 @@ type WeaponsTable struct {
 	WeaponsRefer uint `gorm:"index:,unique"`
 	weapons      []string
 	WeaponsData  string `gorm:"type:TEXT"`
-}
-
-type LoadTable struct {
-	gorm.Model
-	Load     map[uint]map[string][]string // key will be the LoadID while the nested map key will be either Dnd or Campaign. Each nested map key holds values will be arrays that hold data the player saved
-	LoadID   uint
-	LoadData string `gorm:"type:TEXT"` // String literal that represents Load
-}
-
-type SaveTable struct {
-	gorm.Model
-	Save      map[string]string // key will be the time and dat the user saved their data and the value will be the saved file to save
-	SaveRefer uint              `gorm:"index:,unique"`
-	SaveData  string            `gorm:"type:TEXT"`
 }
 
 func generateKey() uint {
@@ -141,9 +124,7 @@ func (T *GameTable) Init(table interface{}, Game interface{}) (interface{}, inte
 	tableData.Options = &OptionsTable{}
 	tableData.Campaign = &CampaignTable{}
 	tableData.Dnd = &DndTable{}
-	tableData.Load = &LoadTable{}
 	tableData.Locations = &LocationsTable{}
-	tableData.Save = &SaveTable{}
 	tableData.Weapons = &WeaponsTable{}
 	return tableData, gameData
 }
@@ -211,18 +192,13 @@ func (T *OptionsTable) Init(optionsTable interface{}, Game interface{}) (interfa
 
 // Pass in the options Struct into Options
 func (T *OptionsTable) Update(Options interface{}) {
-	var existingOptions game.Game
+	existingOptions := Options.(options.Options)
 	db, err := gorm.Open(sqlite.Open("./database/options.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	var existingOptionsTable OptionsTable
-	opts := Options.(game.Game)
-	Deserialize(existingOptionsTable.OptionsData, existingOptions.Options)
-	// Need to compare the size of the bytes to see if there was any changes
-	// If currentGame bytes are greater than existingGame, then update otherwise do nothing
-	// if opts.Options > existingOptions.Options
-	db.Model(&existingOptionsTable).Update("OptionsData", opts.Options)
+	Deserialize(T.OptionsData, existingOptions)
+	db.Model(T).Update("OptionsData", existingOptions)
 }
 
 func (T *OptionsTable) Insert(db *gorm.DB) {
@@ -251,18 +227,13 @@ func (T *DndTable) Init(currTable interface{}, Game interface{}) (interface{}, i
 }
 
 func (T *DndTable) Update(Dnd interface{}) {
-	var existingDnd game.Game
+	existingDnd := Dnd.(dnd.Dnd)
 	db, err := gorm.Open(sqlite.Open("./database/dnd.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	var existingDndTable DndTable
-	dnd := Dnd.(game.Game)
-	Deserialize(existingDndTable.DndData, existingDnd.Dnd)
-	// Need to compare the size of the bytes to see if there was any changes
-	// If currentGame bytes are greater than existingGame, then update otherwise do nothing
-	// if dnd.Dnd > existingDnd.Dnd
-	db.Model(&existingDndTable).Update("DndData", dnd.Dnd)
+	Deserialize(T.DndData, existingDnd)
+	db.Model(T).Update("DndData", existingDnd)
 }
 
 func (T *DndTable) Insert(db *gorm.DB) {
@@ -287,18 +258,13 @@ func (T *CampaignTable) Init(i interface{}, Game interface{}) (interface{}, inte
 }
 
 func (T *CampaignTable) Update(Campaign interface{}) {
-	var existingCampaign game.Game
 	db, err := gorm.Open(sqlite.Open("./database/campaign.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	var existingGameTable CampaignTable
 	campaign := Campaign.(game.Game)
-	Deserialize(existingGameTable.CampaignData, existingCampaign.Campaign)
-	// Need to compare the size of the bytes to see if there was any changes
-	// If currentGame bytes are greater than existingGame, then update otherwise do nothing
-	// if campaign.Campaign > existingCampaign.Campaign
-	db.Model(&existingGameTable).Update("CampaignData", campaign)
+	Deserialize(T.CampaignData, campaign.GameState)
+	db.Model(T).Update("CampaignData", campaign)
 }
 
 func (T *CampaignTable) Insert(db *gorm.DB) {
@@ -326,21 +292,16 @@ func (T *WeaponsTable) Init(i interface{}, Game interface{}) (interface{}, inter
 // Player struct inside of dnd.go has a field called id which will be used
 // Search through Player.Bag.Weapons
 func (T *WeaponsTable) Update(Weapons interface{}) {
-	//var existingWeapons game.Game
 	db, err := gorm.Open(sqlite.Open("./database/weapons.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	var existingWeaponsTable WeaponsTable
 	weapons := Weapons.(game.Game)
-	if weapons.Options.DndMode == 1 {
-		// Pull all the images and render them and update the table
-	}
 	//Deserialize(existingWeaponsTable.WeaponsData, existingWeapons.)
 	// Need to compare the size of the bytes to see if there was any changes
 	// If currentGame bytes are greater than existingGame, then update otherwise do nothing
 	// if campaign.Campaign > existingCampaign.Campaign
-	db.Model(&existingWeaponsTable).Update("WeaponsData", weapons)
+	db.Model(T).Update("WeaponsData", weapons)
 }
 
 func (T *WeaponsTable) Insert(db *gorm.DB) {
@@ -387,82 +348,6 @@ func (T *LocationsTable) Query(db *gorm.DB) {
 }
 
 func (T *LocationsTable) Delete(db *gorm.DB) {
-
-}
-
-func (T *LoadTable) Init(i interface{}, Game interface{}) (interface{}, interface{}) {
-	db, err := gorm.Open(sqlite.Open("./database/load.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	db.AutoMigrate(T)
-	return i, Game
-}
-
-// Use LoadTable's key to mark the human player and load their data
-// Load interface will be an instance of this: map[uint]map[string][]string
-// It will be this basically map[LoadID]["Dnd" or "Campaign"][an array of saved files in the form of a string literal]
-func (T *LoadTable) Update(playerData interface{}) {
-	//db, err := gorm.Open(sqlite.Open("./database/load.db"), &gorm.Config{})
-	//if err != nil {
-	//panic("failed to connect database")
-	//}
-	//var existingGameTable LoadTable
-	//data := playerData.(game.Game)
-	//strMap := "" // Use the Serialize function to transform the data into string
-	//if data.Options.DndMode == 1 {
-	//var temp dnd.SavedData
-	//Deserialize(existingGameTable.LoadData, temp)
-	//dndArr := T.Load[T.LoadID]["Dnd"]
-	// Compare the data.Dnd.SavedData
-
-	//}
-	//var temp main_game.SaveData
-	//Deserialize(existingGameTable.LoadData, temp)
-	//campaignArr := T.Load[T.LoadID]["Campaign"]
-	//db.Model(&existingGameTable).Update("LoadData", strMap)
-}
-
-func (T *LoadTable) Insert(db *gorm.DB) {
-
-}
-
-func (T *LoadTable) Query(db *gorm.DB) {
-
-}
-
-func (T *LoadTable) Delete(db *gorm.DB) {
-
-}
-
-func (T *SaveTable) Init(table interface{}, Game interface{}) (interface{}, interface{}) {
-	db, err := gorm.Open(sqlite.Open("./database/game.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	db.AutoMigrate(T)
-	return table, Game
-}
-
-func (T *SaveTable) Update(savedData interface{}) {
-	db, err := gorm.Open(sqlite.Open("./database/saved.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	strMap := ""
-	var existingGameTable SaveTable
-	db.Model(&existingGameTable).Update("SaveData", strMap)
-}
-
-func (T *SaveTable) Insert(db *gorm.DB) {
-
-}
-
-func (T *SaveTable) Query(db *gorm.DB) {
-
-}
-
-func (T *SaveTable) Delete(db *gorm.DB) {
 
 }
 

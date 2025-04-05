@@ -21,14 +21,14 @@ func main() {
 	r1.InitWindow(800, 450, "Coconuts At Wars")
 	r1.SetTargetFPS(60)
 	if app.Options.GameMode == 1 {
-		updatedOpts, updatedTable := options.UpdateOptions(app.Options, &table)
+		updatedOpts, updatedTable := options.InitOptions(app.Options, &table)
 		app.Options = updatedOpts
 		table = updatedTable.(Layout.Table)
 		//app.Game3D = Layout.Game3D{}
 		//app.Options.Game3D.InitializeTitleScreen() // Initalize the game startup
 		//app.Options.Game3D.InitializeMainMenuScreen(&app, &table)
 	} else {
-		updatedOpts, updatedTable := options.UpdateOptions(app.Options, &table)
+		updatedOpts, updatedTable := options.InitOptions(app.Options, &table)
 		app.Options = updatedOpts
 		table = updatedTable.(Layout.Table)
 		app.Game2D = Layout.Game2D{}
