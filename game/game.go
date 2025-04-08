@@ -13,6 +13,7 @@ import (
 	coop "github.com/alphastigma101/Coconuts-At-Wars/cooperative"
 	Layout "github.com/alphastigma101/Coconuts-At-Wars/layout"
 	"github.com/alphastigma101/Coconuts-At-Wars/options"
+	"github.com/alphastigma101/Coconuts-At-Wars/vehicles"
 )
 
 // TODO: Need to remove the Load Data table. There is no need for it when the GameTable already does that
@@ -20,6 +21,13 @@ import (
 // It will allow the user to load in certain places once they are unlocked
 
 type DataBaseProperties Layout.Properties
+
+type Vehicles struct {
+	Plane vehicles.Plane
+	Boat  vehicles.Boat
+	Car   vehicles.Car
+	Truck vehicles.Truck
+}
 
 type enemies struct {
 	Health int
@@ -33,9 +41,11 @@ type Campaign struct {
 
 // Struct that keeps track of where the user is at in the game and will load them there
 type gameState struct {
-	DdayArea      bool
-	WasteLandArea bool
-	RiverArea     bool
+	DndTutorial     bool
+	RegularTutorial bool
+	DdayArea        bool
+	WasteLandArea   bool
+	RiverArea       bool
 }
 type GameState gameState
 
@@ -49,14 +59,16 @@ type Actor gameActor
 
 // A struct that holds a series of other stand alone structs forming some kind of web
 type Game struct {
+	Database    Layout.Table      // A struct that can be used for easy access to the database table
 	Options     *options.Options  // A struct that can enable coop, 2D or 3D gaming
 	Dnd         *dnd.Dnd          // A struct that has the Dnd related fields to function on its own
 	Cooperative *coop.Cooperative // A struct that has Coop related fields to function on its own
 	Players     *dnd.Player       // A struct that is used to keep track of the health, weapons, and location
-	GameActor   *Actor
+	GameActor   *Actor            // This struct won't be needed. Player field will be used instead
 	Game2D      Layout.Render
 	Game3D      Layout.Render
-	GameState   GameState
+	GameState   GameState // A struct that keeps track of where the player is at and can load the player at that location
+	Vehicles    Vehicles  // A struct that has all the vehicles aliases that the user can use
 }
 
 // During the campaign, if the user clicks a certain button, it will pop up a menu
@@ -79,6 +91,24 @@ func (g *Game) IsCoopEnabled() bool {
 // The sprites will need to be loaded in and so does the collision
 func (g *Game) dDay() {
 
+}
+
+func (g *Game) River() {
+
+}
+
+func (g *Game) RegularTutorial() {
+	// Need to check and see what the user has enabled in their settings to determine if 2D or 3D is enabled
+	// We also need to check constantly to see if the user has pressed a certain key that will open the game options
+	// Map needs to be loaded in called forest
+	// It is made by krita, and it has animation layers in it
+	// The animation layers has different coconuts that will need to have different dialogue above their head whenever the
+	// player is near them.
+	// Collision also needs to be implemented into the map so the user's sprite does not go out of bounds
+	// Will be accessing the field type called Player
+	// The GameTable key needs to be assigned with the player id struct because it is unique
+	// Need to load in the sprite called baby coconut
+	// Need to get the positions for it which will be vector 2
 }
 
 // Free function that allows the user to choose a place to load at if they unlocked it

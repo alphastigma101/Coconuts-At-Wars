@@ -209,18 +209,28 @@ type Mesh *r1.Mesh // It is apart of the 3D model
 type Box *r1.BoundingBox // Can be used for hitbox that can be placed on the player
 
 type GameRenderer interface {
+	// Nested sub menus that interact with the user
+	// They will be effect by the user settings and can be rendered in as 2D or 3D
 	InitializeOptionsScreen(table *Table) (interface{}, interface{})
 	InitializeCoopScreen()
 	InitializeCampaignScreen()
 	InitializeDndScreen()
+	// Main game Functions
+	//dDay()
+	River()
+	// Tutorial game Functions
+	//DndTutorial()
+	RegularTutorial()
+
 	// Simple Getter Functions that check the user's settings and alters the main menu
 	IsDndEnabled() bool
 	IsCoopEnabled() bool
 }
 
-// An interface that defines the layout of the game
+// An interface that defines the layout of the game's main menu
 // The functions inside here would be the parent functions that call other functions i.e the callee
 // Thus allowing the user to navigate properly
+// It will depend if the user wants the main menu and title screen to be rendered in as 2D or 3D
 type Render interface {
 	InitializeTitleScreen() interface{}
 	InitializeMainMenuScreen(Game GameRenderer, table *Table)

@@ -1,11 +1,16 @@
 package input_handler
 
+// Module that contains functions that control the user's movement, reloading, and interacting with the vehicles
+
 import (
 	// Modules that are used for testing
 	"fmt"
 
 	term "github.com/nsf/termbox-go"
 	// My own Modules
+	// Use the dnd module instead and use the layout module as well.
+	// We just need the dnd.Player instance inside a function parameter
+	// We also need the functions that will operate the game which is in the layout module
 	game "github.com/alphastigma101/Coconuts-At-Wars/game"
 )
 

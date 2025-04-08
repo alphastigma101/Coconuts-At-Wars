@@ -13,8 +13,8 @@ type Player struct {
 	id     uint         // Initialize the keys from the database to represent the player. Generate the id for npcs
 	coords map[uint]int // represents the coordinates where the player is on the map
 	// There is no database table for players, so store it inside the struct
-	Players map[uint][]*Player // Represents all the players that will be searched by the id field
-	Actor   interface{}        // There is a struct called gameActor or similar to that, it will be initialized with this field
+	Players map[uint][]*Player  // Represents all the players that will be searched by the id field
+	Actor   map[string][]string // Three keys and values: Sprite: path-to-it, Death: path-to-it,
 }
 
 type enemies struct {
