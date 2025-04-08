@@ -1,7 +1,6 @@
 package main
 
 import (
-	r1 "github.com/gen2brain/raylib-go/raylib"
 	// My own modules
 	database "github.com/alphastigma101/Coconuts-At-Wars/database"
 	game "github.com/alphastigma101/Coconuts-At-Wars/game"
@@ -18,8 +17,8 @@ func main() {
 	table = tempTable.(Layout.Table)
 	app = tempGameTable.(game.Game)
 	// Initialize window first
-	r1.InitWindow(800, 450, "Coconuts At Wars")
-	r1.SetTargetFPS(60)
+	Layout.InitWindow(800, 450, "Coconuts At Wars")
+	Layout.SetTargetFPS(60)
 	if app.Options.GameMode == 1 {
 		updatedOpts, updatedTable := options.InitOptions(app.Options, &table)
 		app.Options = updatedOpts
@@ -41,7 +40,7 @@ func main() {
 		}
 	}
 	// Game Loop
-	for !r1.WindowShouldClose() {
+	for !Layout.WindowShouldClose() {
 		handler := &input.InputHandler{
 			ButtonX: &input.JumpCommand{},
 			ButtonY: &input.FireCommand{},
